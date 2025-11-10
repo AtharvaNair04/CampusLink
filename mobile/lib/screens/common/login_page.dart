@@ -57,6 +57,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           // Blue Background (Full Screen)
@@ -78,99 +79,72 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
 
           // Content
           SafeArea(
-            child: Column(
-              children: [
-                // Logo and Title (Top Left) with Back Button
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Logo and Title (Top Left) with Back Button
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
                         ),
-                        child: const Icon(
-                          Icons.headset_mic,
-                          color: Color(0xFF6B4FA0),
-                          size: 30,
+                        const SizedBox(width: 4),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.headset_mic,
+                            color: Color(0xFF6B4FA0),
+                            size: 30,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Edu Here',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Edu Here',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      // Role Badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white.withOpacity(0.3)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              userRole == 'teacher' ? Icons.person : Icons.school,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              userRole == 'teacher' ? 'Teacher' : 'Student',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
 
-                const Spacer(),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.15),
 
-                // Auth Card (Overlapping)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: AnimatedBuilder(
-                    animation: _animation,
-                    builder: (context, child) {
-                      return Transform(
-                        alignment: Alignment.center,
-                        transform: Matrix4.identity()
-                          ..setEntry(3, 2, 0.001)
-                          ..rotateY(math.pi * _animation.value),
-                        child: _animation.value < 0.5
-                            ? _buildSignInCard()
-                            : Transform(
-                                alignment: Alignment.center,
-                                transform: Matrix4.identity()..rotateY(math.pi),
-                                child: _buildSignUpCard(),
-                              ),
-                      );
-                    },
+                  // Auth Card (Overlapping)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: AnimatedBuilder(
+                      animation: _animation,
+                      builder: (context, child) {
+                        return Transform(
+                          alignment: Alignment.center,
+                          transform: Matrix4.identity()
+                            ..setEntry(3, 2, 0.001)
+                            ..rotateY(math.pi * _animation.value),
+                          child: _animation.value < 0.5
+                              ? _buildSignInCard()
+                              : Transform(
+                                  alignment: Alignment.center,
+                                  transform: Matrix4.identity()..rotateY(math.pi),
+                                  child: _buildSignUpCard(),
+                                ),
+                        );
+                      },
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 40),
-              ],
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ],
@@ -196,13 +170,56 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'Log in',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2C3E50),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Log in',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C3E50),
+                ),
+              ),
+              // Role Badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: userRole == 'teacher' 
+                      ? const Color(0xFF2196F3).withOpacity(0.1)
+                      : const Color(0xFF4CAF50).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: userRole == 'teacher' 
+                        ? const Color(0xFF2196F3)
+                        : const Color(0xFF4CAF50),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      userRole == 'teacher' ? Icons.person : Icons.school,
+                      color: userRole == 'teacher' 
+                          ? const Color(0xFF2196F3)
+                          : const Color(0xFF4CAF50),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      userRole == 'teacher' ? 'Teacher' : 'Student',
+                      style: TextStyle(
+                        color: userRole == 'teacher' 
+                            ? const Color(0xFF2196F3)
+                            : const Color(0xFF4CAF50),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(
@@ -267,7 +284,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
 
           // Forgot Password
           Align(
@@ -276,6 +293,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               onPressed: () {
                 // TODO: Navigate to forgot password
               },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                minimumSize: const Size(0, 0),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
               child: const Text(
                 'Forgot password?',
                 style: TextStyle(
@@ -285,25 +307,19 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
-          // Sign In Button
+          // Log In Button
           SizedBox(
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
               onPressed: () {
                 // TODO: Implement sign in logic based on userRole
-                print('Signing in as: $userRole');
+                print('Logging in as: $userRole');
                 print('Email: ${emailController.text}');
-                // Navigate to appropriate dashboard based on role
-                // For now, just show a snackbar
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Logging in as ${userRole == 'teacher' ? 'Teacher' : 'Student'}'),
-                    backgroundColor: const Color(0xFF2C3E50),
-                  ),
-                );
+                // Navigate to dashboard
+                Navigator.of(context).pushReplacementNamed('/dashboard');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2C3E50),
@@ -371,13 +387,56 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'Sign up',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2C3E50),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Sign up',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C3E50),
+                ),
+              ),
+              // Role Badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: userRole == 'teacher' 
+                      ? const Color(0xFF2196F3).withOpacity(0.1)
+                      : const Color(0xFF4CAF50).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: userRole == 'teacher' 
+                        ? const Color(0xFF2196F3)
+                        : const Color(0xFF4CAF50),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      userRole == 'teacher' ? Icons.person : Icons.school,
+                      color: userRole == 'teacher' 
+                          ? const Color(0xFF2196F3)
+                          : const Color(0xFF4CAF50),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      userRole == 'teacher' ? 'Teacher' : 'Student',
+                      style: TextStyle(
+                        color: userRole == 'teacher' 
+                            ? const Color(0xFF2196F3)
+                            : const Color(0xFF4CAF50),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(
@@ -475,14 +534,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 print('Signing up as: $userRole');
                 print('Name: ${nameController.text}');
                 print('Email: ${emailController.text}');
-                // Navigate to appropriate dashboard based on role
-                // For now, just show a snackbar
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Creating account as ${userRole == 'teacher' ? 'Teacher' : 'Student'}'),
-                    backgroundColor: const Color(0xFF2C3E50),
-                  ),
-                );
+                // Navigate to dashboard
+                Navigator.of(context).pushReplacementNamed('/dashboard');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2C3E50),
