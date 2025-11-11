@@ -5,19 +5,27 @@ import '../screens/common/notifications_page.dart';
 import '../screens/common/profile_page.dart';
 import '../screens/student/classroom_page.dart';
 
-class StudentNavigation extends StatefulWidget {
-  const StudentNavigation({Key? key}) : super(key: key);
+class Navigation extends StatefulWidget {
+  const Navigation({Key? key}) : super(key: key);
 
   @override
-  State<StudentNavigation> createState() => _StudentNavigationState();
+  State<Navigation> createState() => _NavigationState();
 }
 
-class _StudentNavigationState extends State<StudentNavigation> {
+class _NavigationState extends State<Navigation> {
   int _currentIndex = 0;
+  int _notificationTabIndex = 0;
 
-  final List<Widget> _pages = [
-    const HomePage(),
-    const NotificationsPage(),
+  void _switchToNotifications(int tabIndex) {
+    setState(() {
+      _currentIndex = 1; // Switch to notifications tab
+      _notificationTabIndex = tabIndex;
+    });
+  }
+
+  List<Widget> get _pages => [
+    HomePage(onNavigateToNotifications: _switchToNotifications),
+    NotificationsPage(initialTab: _notificationTabIndex, key: ValueKey(_notificationTabIndex)),
     const ClassroomPage(),
     const ProfilePage(),
   ];
