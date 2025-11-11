@@ -6,6 +6,10 @@ class OpeningScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+    final screenHeight = size.height;
+    
     return Scaffold(
       backgroundColor: const Color(0xFF2F2D52),
       body: SafeArea(

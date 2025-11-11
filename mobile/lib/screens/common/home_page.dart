@@ -67,12 +67,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+    final screenHeight = size.height;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(screenWidth * 0.05),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -85,7 +89,7 @@ class _HomePageState extends State<HomePage> {
                     color: Color(0xFF2C3E50),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: screenHeight * 0.01),
                 Text(
                   'Welcome back!',
                   style: TextStyle(
@@ -93,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.grey.shade600,
                   ),
                 ),
-                const SizedBox(height: 30),
+                SizedBox(height: screenHeight * 0.03),
 
                 // High Priority Notifications Section
                 _buildSectionHeader(

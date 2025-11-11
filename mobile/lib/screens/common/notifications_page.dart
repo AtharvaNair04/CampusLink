@@ -108,6 +108,9 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
@@ -116,7 +119,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(screenWidth * 0.05),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
@@ -134,7 +137,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
             
             // Tabs
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -177,6 +180,8 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
   }
 
   Widget _buildNotificationList(List<Map<String, dynamic>> notificationsList) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    
     if (notificationsList.isEmpty) {
       return Center(
         child: Column(
@@ -197,7 +202,7 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
       itemCount: notificationsList.length,
       itemBuilder: (context, index) {
         return NotificationCard(

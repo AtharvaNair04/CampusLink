@@ -56,6 +56,10 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+    final screenHeight = size.height;
+    
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Stack(
@@ -315,11 +319,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             height: 56,
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Implement sign in logic based on userRole
-                print('Logging in as: $userRole');
-                print('Email: ${emailController.text}');
-                // Navigate to dashboard
-                Navigator.of(context).pushReplacementNamed('/dashboard');
+                // Navigate to dashboard with role
+                Navigator.of(context).pushReplacementNamed(
+                  '/dashboard',
+                  arguments: {'role': userRole},
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2C3E50),

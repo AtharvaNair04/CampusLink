@@ -4,9 +4,12 @@ import '../screens/common/home_page.dart';
 import '../screens/common/notifications_page.dart';
 import '../screens/common/profile_page.dart';
 import '../screens/student/classroom_page.dart';
+import '../screens/teacher/classroom_finder_page.dart';
 
 class Navigation extends StatefulWidget {
-  const Navigation({Key? key}) : super(key: key);
+  final String role;
+  
+  const Navigation({Key? key, required this.role}) : super(key: key);
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -26,7 +29,7 @@ class _NavigationState extends State<Navigation> {
   List<Widget> get _pages => [
     HomePage(onNavigateToNotifications: _switchToNotifications),
     NotificationsPage(initialTab: _notificationTabIndex, key: ValueKey(_notificationTabIndex)),
-    const ClassroomPage(),
+    widget.role == 'teacher' ? const ClassroomFinderPage() : const ClassroomPage(),
     const ProfilePage(),
   ];
 

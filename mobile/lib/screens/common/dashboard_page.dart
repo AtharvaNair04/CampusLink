@@ -6,7 +6,11 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Navigation();
+    // Get the role from navigation arguments
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String role = args?['role'] ?? 'student';
+    
+    return Navigation(role: role);
   }
 }
 

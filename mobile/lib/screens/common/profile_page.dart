@@ -15,16 +15,21 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+    final screenHeight = size.height;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Profile Heading - bigger and more left
-              const Text(
+          child: Padding(
+            padding: EdgeInsets.all(screenWidth * 0.05),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Profile Heading - bigger and more left
+                const Text(
                 'Profile',
                 style: TextStyle(
                   fontSize: 36,
@@ -153,7 +158,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   activeColor: const Color(0xFF7AB8F7),
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
