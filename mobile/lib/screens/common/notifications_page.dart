@@ -139,22 +139,42 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
               child: Container(
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: TabBar(
                   controller: _tabController,
                   labelColor: Colors.white,
-                  unselectedLabelColor: const Color(0xFF7AB8F7),
+                  unselectedLabelColor: const Color(0xFF2C3E50),
+                  labelStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                   indicator: BoxDecoration(
                     color: const Color(0xFF7AB8F7),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
                   tabs: const [
-                    Tab(text: 'All'),
-                    Tab(text: 'Priority'),
-                    Tab(text: 'Liked'),
+                    Tab(
+                      height: 45,
+                      child: Center(child: Text('All')),
+                    ),
+                    Tab(
+                      height: 45,
+                      child: Center(child: Text('Priority')),
+                    ),
+                    Tab(
+                      height: 45,
+                      child: Center(child: Text('Liked')),
+                    ),
                   ],
                 ),
               ),
@@ -162,10 +182,11 @@ class _NotificationsPageState extends State<NotificationsPage> with SingleTicker
             
             const SizedBox(height: 16),
             
-            // Tab Views
+            // Tab Views - Swipe enabled
             Expanded(
               child: TabBarView(
                 controller: _tabController,
+                physics: const BouncingScrollPhysics(), // Enable smooth swipe gesture
                 children: [
                   _buildNotificationList(allNotifications),
                   _buildNotificationList(priorityNotifications),

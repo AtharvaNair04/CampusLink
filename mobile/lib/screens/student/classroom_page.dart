@@ -8,10 +8,12 @@ class ClassroomPage extends StatefulWidget {
 }
 
 class _ClassroomPageState extends State<ClassroomPage> {
-  DateTime? selectedDate;
+  late DateTime selectedDate;
   String? selectedTimeSlot;
-  bool showResults = false;
+  bool showResults = true; // Show results by default
+  bool showFilterSection = false; // Filter section collapsed by default
 
+  // Define time slots first before initState
   final List<Map<String, String>> timeSlots = [
     {'start': '9:00', 'end': '9:50'},
     {'start': '9:50', 'end': '10:40'},
@@ -23,6 +25,39 @@ class _ClassroomPageState extends State<ClassroomPage> {
     {'start': '3:10', 'end': '4:00'},
     {'start': '4:00', 'end': '5:00'},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Set today's date and current time slot by default
+    selectedDate = DateTime.now();
+    selectedTimeSlot = _getCurrentTimeSlot();
+  }
+
+  // Get current time slot based on device time
+  String? _getCurrentTimeSlot() {
+    final now = TimeOfDay.now();
+    final currentMinutes = now.hour * 60 + now.minute;
+    
+    for (var slot in timeSlots) {
+      final startParts = slot['start']!.split(':');
+      final startMinutes = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+      final endParts = slot['end']!.split(':');
+      final endMinutes = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+      
+      if (currentMinutes >= startMinutes && currentMinutes < endMinutes) {
+        return '${slot['start']} - ${slot['end']}';
+      }
+    }
+    
+    // If current time is past all slots, return the first slot
+    if (timeSlots.isNotEmpty) {
+      final firstSlot = timeSlots.first;
+      return '${firstSlot['start']} - ${firstSlot['end']}';
+    }
+    
+    return null;
+  }
 
   // Sample data - in real app, this would come from backend based on date/time
   // This simulates which classrooms are free for the selected slot
@@ -63,7 +98,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? DateTime.now(),
+      initialDate: selectedDate,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 30)),
       builder: (context, child) {
@@ -82,16 +117,30 @@ class _ClassroomPageState extends State<ClassroomPage> {
     if (picked != null) {
       setState(() {
         selectedDate = picked;
-        showResults = false; // Reset results when date changes
+        showResults = true; // Show results immediately
       });
     }
   }
 
   void _searchClassrooms() {
-    if (selectedDate != null && selectedTimeSlot != null) {
+    if (selectedTimeSlot != null) {
       setState(() {
         showResults = true;
+        showFilterSection = false; // Collapse filter after search
       });
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    final today = DateTime.now();
+    final tomorrow = today.add(const Duration(days: 1));
+    
+    if (date.year == today.year && date.month == today.month && date.day == today.day) {
+      return 'Today';
+    } else if (date.year == tomorrow.year && date.month == tomorrow.month && date.day == tomorrow.day) {
+      return 'Tomorrow';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
     }
   }
 
@@ -99,7 +148,6 @@ class _ClassroomPageState extends State<ClassroomPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final screenWidth = size.width;
-    final screenHeight = size.height;
     
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -107,16 +155,33 @@ class _ClassroomPageState extends State<ClassroomPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
+            // Title with Filter Button
             Padding(
               padding: EdgeInsets.all(screenWidth * 0.05),
-              child: const Text(
-                'Classrooms',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C3E50),
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Classrooms',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2C3E50),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      showFilterSection ? Icons.filter_alt : Icons.filter_alt_outlined,
+                      color: const Color(0xFF7AB8F7),
+                      size: 28,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        showFilterSection = !showFilterSection;
+                      });
+                    },
+                  ),
+                ],
               ),
             ),
 
@@ -126,8 +191,59 @@ class _ClassroomPageState extends State<ClassroomPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Search Section
+                    // Current Date and Time Info
                     Container(
+                      padding: EdgeInsets.all(screenWidth * 0.04),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF7AB8F7), Color(0xFF9EC8FF)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.calendar_today, color: Colors.white, size: 24),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _formatDate(selectedDate),
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  selectedTimeSlot ?? 'Select time slot',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Filter/Search Section (Collapsible)
+                    if (showFilterSection) Container(
                       padding: EdgeInsets.all(screenWidth * 0.05),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -144,19 +260,32 @@ class _ClassroomPageState extends State<ClassroomPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Search Available Classrooms',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2C3E50),
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Filter Classrooms',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF2C3E50),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close, color: Color(0xFF2C3E50)),
+                                onPressed: () {
+                                  setState(() {
+                                    showFilterSection = false;
+                                  });
+                                },
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
 
                           // Date Selection
                           const Text(
-                            'Select Date',
+                            'Change Date',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -178,12 +307,10 @@ class _ClassroomPageState extends State<ClassroomPage> {
                                   const Icon(Icons.calendar_today, color: Color(0xFF7AB8F7), size: 20),
                                   const SizedBox(width: 12),
                                   Text(
-                                    selectedDate != null
-                                        ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
-                                        : 'Select date',
-                                    style: TextStyle(
+                                    '${_formatDate(selectedDate)} - ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                                    style: const TextStyle(
                                       fontSize: 16,
-                                      color: selectedDate != null ? const Color(0xFF2C3E50) : Colors.grey.shade500,
+                                      color: Color(0xFF2C3E50),
                                     ),
                                   ),
                                   const Spacer(),
@@ -197,7 +324,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
 
                           // Time Slot Selection
                           const Text(
-                            'Select Time Slot',
+                            'Change Time Slot',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -237,7 +364,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
                                 onChanged: (value) {
                                   setState(() {
                                     selectedTimeSlot = value;
-                                    showResults = false; // Reset results when time changes
+                                    showResults = true; // Show results immediately
                                   });
                                 },
                               ),
@@ -246,14 +373,12 @@ class _ClassroomPageState extends State<ClassroomPage> {
 
                           const SizedBox(height: 20),
 
-                          // Search Button
+                          // Apply Filter Button
                           SizedBox(
                             width: double.infinity,
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: (selectedDate != null && selectedTimeSlot != null)
-                                  ? _searchClassrooms
-                                  : null,
+                              onPressed: selectedTimeSlot != null ? _searchClassrooms : null,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF7AB8F7),
                                 disabledBackgroundColor: Colors.grey.shade300,
@@ -265,14 +390,14 @@ class _ClassroomPageState extends State<ClassroomPage> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.search, color: Colors.white),
+                                  const Icon(Icons.check_circle, color: Colors.white),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Search Classrooms',
+                                    'Apply Filter',
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: (selectedDate != null && selectedTimeSlot != null)
+                                      color: selectedTimeSlot != null
                                           ? Colors.white
                                           : Colors.grey.shade500,
                                     ),
