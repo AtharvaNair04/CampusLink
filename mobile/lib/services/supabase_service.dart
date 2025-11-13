@@ -105,28 +105,35 @@ class SupabaseService {
     required DateTime date,
     required String timeSlot,
   }) async {
-    // Get all classrooms
-    final allClassrooms = await client
-        .from('classrooms')
-        .select()
-        .eq('status', 'Available');
     
-    // Get bookings for the specified date and time
-    final bookings = await client
+    // 1. Get ALL classrooms
+    final allClassroomsResponse = await client
+        .from('classrooms')
+        .select(); // Semicolon was missing here before
+
+    // Cast the response to a List
+    final allClassrooms = List<Map<String, dynamic>>.from(allClassroomsResponse);
+
+    // 2. Get all bookings that are 'Pending' OR 'Approved'
+    final bookingsResponse = await client
         .from('bookings')
         .select('room')
         .eq('date', date.toIso8601String().split('T')[0])
         .eq('time_slot', timeSlot)
-        .eq('status', 'Approved');
+        // 
+        // THIS IS THE FIX:
+        //
+        .inFilter('status', ['Pending', 'Approved']); // Use .inFilter instead of .in_
+
+    // 3. Cast the bookings response
+    final bookedRooms = (bookingsResponse as List).map((b) => b['room']).toSet();
     
-    final bookedRooms = (bookings as List).map((b) => b['room']).toSet();
-    
-    // Filter out booked classrooms
-    final available = (allClassrooms as List).where((classroom) {
+    // 4. Filter the full list
+    final available = allClassrooms.where((classroom) {
       return !bookedRooms.contains(classroom['room_no']);
     }).toList();
     
-    return List<Map<String, dynamic>>.from(available);
+    return available;
   }
   
   // Booking Management
