@@ -127,11 +127,11 @@ class _HomePageState extends State<HomePage> {
         child: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.all(screenWidth * 0.05),
+            padding: EdgeInsets.all(screenWidth * 0.04),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Welcome Header
+                // Header
                 Text(
                   'Dashboard',
                   style: TextStyle(
@@ -141,14 +141,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.01),
-                Text(
-                  'Welcome back!',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.03),
 
                 // Events Section - DYNAMIC via Supabase
                 Row(

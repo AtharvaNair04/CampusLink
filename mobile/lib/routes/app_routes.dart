@@ -7,7 +7,6 @@ import '../screens/common/documents_page.dart';
 import '../screens/common/profile_page.dart';
 import '../screens/common/logout_page.dart';
 import '../screens/common/classroom_finder_page.dart';
-import '../screens/teacher/booking_request_page.dart';
 import '../screens/student/alerts_page.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
@@ -19,7 +18,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/profile': (context) => const ProfilePage(),
   '/logout': (context) => const LogoutPage(),
   '/teacher/find': (context) => const ClassroomFinderPage(),
-  '/teacher/booking': (context) => const BookingRequestPage(),
   '/student/alerts': (context) => const AlertsPage(),
 };
 

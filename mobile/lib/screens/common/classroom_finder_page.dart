@@ -1,4 +1,7 @@
+// lib/screens/common/classroom_finder_page.dart
 import 'package:flutter/material.dart';
+import '../../services/supabase_service.dart';
+import '../student/classroom_details_page.dart'; // <--- THIS IS THE FIX
 
 class ClassroomFinderPage extends StatefulWidget {
   const ClassroomFinderPage({Key? key}) : super(key: key);
@@ -10,10 +13,10 @@ class ClassroomFinderPage extends StatefulWidget {
 class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
   late DateTime selectedDate;
   String? selectedTimeSlot;
-  bool showResults = true; // Show results by default
-  bool showFilterSection = false; // Filter section collapsed by default
+  bool showFilterSection = false;
 
-  // Define time slots first before initState
+  late Future<List<Map<String, dynamic>>> _classroomsFuture;
+
   final List<Map<String, String>> timeSlots = [
     {'start': '9:00', 'end': '9:50'},
     {'start': '9:50', 'end': '10:40'},
@@ -29,25 +32,31 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
   @override
   void initState() {
     super.initState();
-    // Set today's date and current time slot by default based on device time
     final now = DateTime.now();
     final nowMinutes = now.hour * 60 + now.minute;
     const cutoffMinutes = 13 * 60 + 20; // 13:20
+
     if (nowMinutes >= cutoffMinutes) {
       selectedDate = now.add(const Duration(days: 1));
-      if (timeSlots.isNotEmpty) {
-        final first = timeSlots.first;
-        selectedTimeSlot = '${first['start']} - ${first['end']}';
-      } else {
-        selectedTimeSlot = null;
-      }
+      selectedTimeSlot = '${timeSlots.first['start']} - ${timeSlots.first['end']}';
     } else {
       selectedDate = now;
-      selectedTimeSlot = _getCurrentTimeSlot();
+      selectedTimeSlot = _getCurrentTimeSlot() ?? '${timeSlots.first['start']} - ${timeSlots.first['end']}';
     }
+    
+    _loadAvailableClassrooms();
   }
 
-  // Get current time slot based on device time
+  void _loadAvailableClassrooms() {
+    if (selectedTimeSlot == null) return;
+    setState(() {
+      _classroomsFuture = SupabaseService.getAvailableClassrooms(
+        date: selectedDate,
+        timeSlot: selectedTimeSlot!,
+      );
+    });
+  }
+
   String? _getCurrentTimeSlot() {
     final now = TimeOfDay.now();
     final currentMinutes = now.hour * 60 + now.minute;
@@ -62,54 +71,7 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
         return '${slot['start']} - ${slot['end']}';
       }
     }
-
-    // If current time is past cutoff (1:20 PM), return null so caller can advance date
-    const cutoffMinutes = 13 * 60 + 20;
-    if (currentMinutes >= cutoffMinutes) return null;
-
-    // Otherwise return first slot as default
-    if (timeSlots.isNotEmpty) {
-      final firstSlot = timeSlots.first;
-      return '${firstSlot['start']} - ${firstSlot['end']}';
-    }
-
     return null;
-  }
-
-  // Sample data - in real app, this would come from backend based on date/time
-  // This simulates which classrooms are free for the selected slot
-  final Map<String, bool> allClassrooms = {
-    'S001': false,
-    'S002': true,
-    'S003': false,
-    'S004': false,
-    'S005': true,
-    'S006': false,
-    'S007': true,
-    'S008': false,
-    'S009': false,
-    'S010': true,
-    'S011': false,
-    'S012': false,
-    'N001': false,
-    'N002': true,
-    'N003': false,
-    'N004': true,
-    'N005': false,
-    'N006': false,
-    'N007': true,
-    'N008': false,
-    'N009': true,
-    'N010': false,
-    'N011': false,
-    'N012': true,
-  };
-
-  List<String> get freeClassrooms {
-    return allClassrooms.entries
-        .where((entry) => !entry.value) // Only free classrooms
-        .map((entry) => entry.key)
-        .toList();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -118,7 +80,7 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
       initialDate: selectedDate,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 30)),
-      builder: (context, child) {
+       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
@@ -134,16 +96,16 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
     if (picked != null) {
       setState(() {
         selectedDate = picked;
-        showResults = true; // Show results immediately
+        _loadAvailableClassrooms(); 
       });
     }
   }
 
   void _searchClassrooms() {
     if (selectedTimeSlot != null) {
+      _loadAvailableClassrooms();
       setState(() {
-        showResults = true;
-        showFilterSection = false; // Collapse filter after search
+        showFilterSection = false; 
       });
     }
   }
@@ -169,7 +131,7 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
     final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     final cardColor = Theme.of(context).cardColor;
-    
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -193,7 +155,6 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title (filter removed)
             Padding(
               padding: EdgeInsets.all(screenWidth * 0.05),
               child: Row(
@@ -216,7 +177,6 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Current Date and Time Info (Tappable to change)
                     GestureDetector(
                       onTap: () {
                         setState(() {
@@ -305,8 +265,6 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
                     ),
 
                     const SizedBox(height: 16),
-
-                    // Filter/Search Section (Collapsible)
                     if (showFilterSection) Container(
                       padding: EdgeInsets.all(screenWidth * 0.05),
                       decoration: BoxDecoration(
@@ -346,16 +304,7 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
                             ],
                           ),
                           const SizedBox(height: 12),
-
-                          // Date Selection
-                          Text(
-                            'Change Date',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: textColor,
-                            ),
-                          ),
+                          Text('Change Date', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
                           const SizedBox(height: 8),
                           GestureDetector(
                             onTap: () => _selectDate(context),
@@ -372,10 +321,7 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
                                   const SizedBox(width: 12),
                                   Text(
                                     '${_formatDate(selectedDate)} - ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: textColor,
-                                    ),
+                                    style: TextStyle(fontSize: 16, color: textColor),
                                   ),
                                   const Spacer(),
                                   const Icon(Icons.arrow_drop_down, color: Color(0xFF7AB8F7)),
@@ -383,18 +329,8 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 20),
-
-                          // Time Slot Selection
-                          Text(
-                            'Change Time Slot',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: textColor,
-                            ),
-                          ),
+                          Text('Change Time Slot', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -406,10 +342,7 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 isExpanded: true,
-                                hint: Text(
-                                  'Select time slot',
-                                  style: TextStyle(color: Colors.grey.shade500),
-                                ),
+                                hint: Text('Select time slot', style: TextStyle(color: Colors.grey.shade500)),
                                 value: selectedTimeSlot,
                                 icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF7AB8F7)),
                                 items: timeSlots.map((slot) {
@@ -428,16 +361,13 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
                                 onChanged: (value) {
                                   setState(() {
                                     selectedTimeSlot = value;
-                                    showResults = true; // Show results immediately
                                   });
+                                  _loadAvailableClassrooms(); 
                                 },
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 20),
-
-                          // Apply Filter Button
                           SizedBox(
                             width: double.infinity,
                             height: 50,
@@ -461,9 +391,7 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: selectedTimeSlot != null
-                                          ? Colors.white
-                                          : Colors.grey.shade500,
+                                      color: selectedTimeSlot != null ? Colors.white : Colors.grey.shade500,
                                     ),
                                   ),
                                 ],
@@ -473,43 +401,75 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 24),
+                    FutureBuilder<List<Map<String, dynamic>>>(
+                      future: _classroomsFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Center(child: Text("Error loading classrooms"));
+                        }
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const Center(child: Text("No available classrooms found for this slot."));
+                        }
 
-                    // Results Section
-                    if (showResults) ...[
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${freeClassrooms.length} Available Classrooms',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
+                        final freeClassrooms = snapshot.data!;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${freeClassrooms.length} Available Classrooms',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: textColor,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Available Classrooms Grid
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 1.0,
-                        ),
-                        itemCount: freeClassrooms.length,
-                        itemBuilder: (context, index) {
-                          return _buildClassroomCard(freeClassrooms[index]);
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                    ],
+                            const SizedBox(height: 16),
+                            GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                childAspectRatio: 1.0,
+                              ),
+                              itemCount: freeClassrooms.length,
+                              itemBuilder: (context, index) {
+                                final classroom = freeClassrooms[index];
+                                final classroomName = classroom['room_no'];
+                                return _buildClassroomCard(
+                                  classroomName: classroomName,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ClassroomDetailsPage(
+                                          classroomName: classroomName,
+                                          // Note: This details page doesn't accept date/time
+                                          // It's a general info page, which is fine for students.
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -521,61 +481,65 @@ class _ClassroomFinderPageState extends State<ClassroomFinderPage> {
     );
   }
 
-  Widget _buildClassroomCard(String classroomName) {
+  Widget _buildClassroomCard({required String classroomName, required VoidCallback onTap}) {
     final cardColor = Theme.of(context).cardColor;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFF7AB8F7).withOpacity(0.3),
-          width: 2,
+    return InkWell( 
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF7AB8F7).withOpacity(0.3),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.meeting_room,
-            color: Color(0xFF7AB8F7),
-            size: 32,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            classroomName,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: textColor,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.meeting_room,
+              color: Color(0xFF7AB8F7),
+              size: 32,
             ),
-          ),
-          const SizedBox(height: 4),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.green.shade100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              'Available',
+            const SizedBox(height: 6),
+            Text(
+              classroomName,
               style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: Colors.green.shade700,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: textColor,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.green.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'Available',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.green.shade700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
