@@ -71,14 +71,18 @@ export default function AdminDashboard() {
       const combinedActivity = [
         ...(alertData || []).map((a: any) => ({
           title: `New alert posted: ${a.title}`,
-          time: new Date(a.created_at).toLocaleString(),
+          time: new Date(a.created_at).toLocaleDateString("en-IN", {
+                  timeZone: "Asia/Kolkata",
+                }),
           icon: Bell,
           color: "text-[#8B1538]",
           bgColor: "bg-[#F5E6D3]/50",
         })),
         ...(bookingData || []).map((b: any) => ({
           title: `Booking request: ${b.room} — ${b.purpose}`,
-          time: new Date(b.created_at).toLocaleString(),
+          time: new Date(b.created_at).toLocaleDateString("en-IN", {
+                  timeZone: "Asia/Kolkata",
+                }),
           icon: ClipboardList,
           color: "text-amber-600",
           bgColor: "bg-amber-100",
@@ -147,7 +151,7 @@ export default function AdminDashboard() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-[#8B1538] to-[#A01842] bg-clip-text text-transparent">
-            Admin Dashboard
+            Track. Manage. Lead.
           </h1>
           <p className="text-[#8B1538]/70 mt-2 flex items-center gap-2">
             <Activity className="w-4 h-4" />
