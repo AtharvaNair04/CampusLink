@@ -13,13 +13,20 @@ import {
   User,
   ChevronDown,
   X,
+  Clock,
+  Table,
 } from "lucide-react";
-import { useSupabase } from "@/components/supabase-provider"; // ✅ use session + client
+import { useSupabase } from "@/components/supabase-provider";
 
-export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-
+export default function Sidebar({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const pathname = usePathname();
-  const { session } = useSupabase(); // ✅ access session from Supabase
+  const { session } = useSupabase();
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
@@ -32,7 +39,20 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Alerts & Circulars", href: "/admin/alerts", icon: BellRing },
     { name: "Documents", href: "/admin/documents", icon: FileText },
+
+    // CLASSROOM RELATED
     { name: "Classrooms", href: "/admin/classrooms", icon: School },
+    {
+      name: "Check Availability",
+      href: "/admin/classrooms/check",
+      icon: Clock,
+    },
+    {
+      name: "Timetable",
+      href: "/admin/classrooms/timetable",
+      icon: Table,
+    },
+
     { name: "Bookings", href: "/admin/bookings", icon: Calendar },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Profile", href: "/admin/profile", icon: User },
@@ -48,7 +68,6 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
         fixed lg:sticky top-0 left-0 h-screen z-50
@@ -58,7 +77,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
       `}
       >
-        {/* Logo Section */}
+        {/* Logo */}
         <div className="p-6 border-b border-[#A01842]/30 bg-[#8B1538]/50 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -107,15 +126,17 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
                   <div className="absolute inset-0 bg-gradient-to-r from-[#F5E6D3] to-[#D4AF37] opacity-20 animate-pulse" />
                 )}
                 <Icon
-                  className={`w-5 h-5 relative z-10 ${
-                    isActive
-                      ? "text-[#8B1538]"
-                      : "text-[#F5E6D3]/70 group-hover:text-[#D4AF37]"
-                  } transition-colors`}
+                  className={`
+                    w-5 h-5 relative z-10 
+                    ${
+                      isActive
+                        ? "text-[#8B1538]"
+                        : "text-[#F5E6D3]/70 group-hover:text-[#D4AF37]"
+                    }
+                  `}
                 />
-                <span className="font-medium relative z-10">
-                  {item.name}
-                </span>
+                <span className="font-medium relative z-10">{item.name}</span>
+
                 {isActive && (
                   <div className="ml-auto w-2 h-2 bg-[#8B1538] rounded-full relative z-10" />
                 )}
@@ -124,7 +145,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
           })}
         </nav>
 
-        {/* ✅ Logged-in User Info Section */}
+        {/* User Info */}
         <div className="p-4 border-t border-[#A01842]/30 bg-[#8B1538]/50">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-[#A01842]/30 hover:bg-[#A01842]/50 transition-colors">
             <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37] to-[#F5E6D3] rounded-full flex items-center justify-center text-[#8B1538] font-bold uppercase">
