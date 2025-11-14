@@ -345,4 +345,9 @@ class SupabaseService {
         .eq('id', userId); // Assumes 'id' is the UUID foreign key
   }
 
+  static Future<void> updateUserPassword(String newPassword) async {
+    await client.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
+  }
 }
