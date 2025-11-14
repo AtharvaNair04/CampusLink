@@ -15,6 +15,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/documents': (context) => const DocumentsPage(),
   '/profile': (context) => const ProfilePage(),
   '/logout': (context) => const LogoutPage(),
-  '/teacher/find': (context) => const ClassroomFinderPage(),
+  //'/teacher/find': (context) => const ClassroomFinderPage(),
   '/student/alerts': (context) => const AlertsPage(),
 };
