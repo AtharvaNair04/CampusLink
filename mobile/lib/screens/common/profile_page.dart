@@ -26,9 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
     
     final userProvider = Provider.of<UserProvider>(context);
     
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
+    return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -65,7 +63,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF8B1538),
+                      fontFamily: 'serif',
+                      color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF8B1538),
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -199,7 +198,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-      ),
       ),
     );
   }

@@ -1,4 +1,3 @@
-// lib/screens/common/user_profile_edit_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
@@ -19,7 +18,7 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
   @override
   void initState() {
     super.initState();
-    // 1. Load data from the provider when the page opens
+    // Load data from the provider when the page opens
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     
     // Split the full name into first and last
@@ -40,7 +39,7 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
     super.dispose();
   }
 
-  // 2. New function to handle saving the profile
+  // Function to handle saving the profile
   Future<void> _saveProfile() async {
     if (_firstNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -55,7 +54,7 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
     final String newFullName = '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'.trim();
 
     try {
-      // 3. Call the provider's update function
+      // Call the provider's update function
       await Provider.of<UserProvider>(context, listen: false)
           .updateProfile(name: newFullName);
 
@@ -80,31 +79,51 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 4. GET THE USER TYPE from the provider
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final userType = Provider.of<UserProvider>(context, listen: false).role;
-
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [
+                    const Color(0xFF1A1A1A),
+                    const Color(0xFF2A2A2A),
+                    const Color(0xFF3A3A3A),
+                  ]
+                : [
+                    const Color(0xFFFFF9F0),
+                    const Color(0xFFF5E6D3),
+                    const Color(0xFFE8D5C4),
+                  ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header with back button
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Color(0xFF2C3E50)),
+                    icon: Icon(Icons.arrow_back, color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF8B1538)),
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     'User Profile',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
+                      fontFamily: 'serif',
+                      color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF8B1538),
                     ),
                   ),
                 ],
@@ -112,12 +131,12 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
               const SizedBox(height: 30),
 
               // First Name Field
-              const Text(
+              Text(
                 'First Name',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C3E50),
+                  color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF2C3E50),
                 ),
               ),
               const SizedBox(height: 8),
@@ -140,12 +159,12 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
               const SizedBox(height: 20),
 
               // Last Name Field
-              const Text(
+              Text(
                 'Last Name',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C3E50),
+                  color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF2C3E50),
                 ),
               ),
               const SizedBox(height: 8),
@@ -167,14 +186,13 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
               ),
               const SizedBox(height: 20),
 
-              // Roll Number (Read-only) - NOW DYNAMIC
+              // Roll Number (Read-only) - DYNAMIC
               Text(
-                // 5. DYNAMIC LABEL
                 userType == 'student' ? 'Roll Number' : 'Teacher ID',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C3E50),
+                  color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF2C3E50),
                 ),
               ),
               const SizedBox(height: 8),
@@ -188,7 +206,7 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                 child: Row(
                   children: [
                     Text(
-                      rollNoOrTid, // 6. READ DYNAMIC ID
+                      rollNoOrTid,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
@@ -206,7 +224,7 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveProfile, // 7. CALL SAVE FUNCTION
+                  onPressed: _isLoading ? null : _saveProfile,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF7AB8F7),
                     disabledBackgroundColor: Colors.grey.shade400,
@@ -230,6 +248,7 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

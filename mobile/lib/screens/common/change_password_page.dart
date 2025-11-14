@@ -110,43 +110,65 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header with back button
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Color(0xFF2C3E50)),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Change Password',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [
+                    const Color(0xFF1A1A1A),
+                    const Color(0xFF2A2A2A),
+                    const Color(0xFF3A3A3A),
+                  ]
+                : [
+                    const Color(0xFFFFF9F0),
+                    const Color(0xFFF5E6D3),
+                    const Color(0xFFE8D5C4),
+                  ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with back button
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back, color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF8B1538)),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-
-              // Current Password Field
-              const Text(
-                'Current Password',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C3E50),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Change Password',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'serif',
+                        color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF8B1538),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+                const SizedBox(height: 30),
+
+                // Current Password Field
+                Text(
+                  'Current Password',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF2C3E50),
+                  ),
+                ),
               const SizedBox(height: 8),
               TextField(
                 controller: _currentPasswordController,
@@ -179,12 +201,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 20),
 
               // New Password Field
-              const Text(
+              Text(
                 'New Password',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C3E50),
+                  color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF2C3E50),
                 ),
               ),
               const SizedBox(height: 8),
@@ -219,12 +241,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 20),
 
               // Confirm New Password Field
-              const Text(
+              Text(
                 'Confirm New Password',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C3E50),
+                  color: isDark ? const Color(0xFFF5E6D3) : const Color(0xFF2C3E50),
                 ),
               ),
               const SizedBox(height: 8),
@@ -289,6 +311,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
